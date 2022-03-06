@@ -20,10 +20,10 @@ message(STATUS "thread " ${CMAKE_THREAD_LIBS_INIT})
 
 include_directories(SYSTEM ${PCAP_INCLUDE_DIR})
 
+if (WIN32)
 add_executable(findalldevs_ex src/pcap_findalldevs_ex.cpp)
 target_compile_definitions(findalldevs_ex PUBLIC HAVE_REMOTE)
 target_link_libraries(findalldevs_ex ${PCAP_LIBRARY})
-if (WIN32)
 target_link_libraries(findalldevs_ex ws2_32.lib)
 endif()
 
