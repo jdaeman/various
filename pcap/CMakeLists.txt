@@ -46,3 +46,11 @@ target_link_libraries(openlive ${PCAP_LIBRARY})
 if (WIN32)
 target_link_libraries(openlive ws2_32.lib)
 endif()
+
+link_libraries(${PCAP_LIBRARY})
+if (WIN32)
+link_libraries(ws2_32.lib)
+endif()
+
+add_executable(capture src/pcap_capture.cpp)
+
