@@ -1,5 +1,7 @@
 #include "pcap.h"
 
+#include <cstdlib>
+#include <cstring>
 
 void packet_handler(u_char* param,
                     const struct pcap_pkthdr* header, 
@@ -59,9 +61,9 @@ int main(int argc, char** argv)
     }
     else {
         // buffer size
-        // non-promiscous mode
+        // promiscous mode
         // timeout (ms)
-        adhandle = pcap_open_live(d->name, 65535, 0, timeout, errbuf);
+        adhandle = pcap_open_live(d->name, 65535, 1, timeout, errbuf);
         if (adhandle == NULL) {
             printf("pcap_open_live error %s\n", errbuf);
             pcap_freealldevs(alldevs);
