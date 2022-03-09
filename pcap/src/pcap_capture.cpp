@@ -7,6 +7,9 @@ void packet_handler(u_char* param,
                     const struct pcap_pkthdr* header, 
                     const u_char* pkt_data) 
 {
+    if (param != NULL) {
+        *param += 1;
+    }
     printf("caplen: %d\n", header->caplen);
 	printf("len: %d\n\n", header->len);
 }
@@ -83,16 +86,17 @@ int main(int argc, char** argv)
 
         pcap_freealldevs(alldevs);
         int ret = 999999999;
+        u_char user_data = 0;
 
         switch (capture_type)
         {
         case 0:
             // pcap_dispatch
-            ret = pcap_dispatch(adhandle, capture_count, packet_handler, NULL);
+            ret = pcap_dispatch(adhandle, capture_count, packet_handler, &user_data);
             break;
         case 1:
             // pcap_loop
-            ret = pcap_loop(adhandle, capture_count, packet_handler, NULL);
+            ret = pcap_loop(adhandle, capture_count, packet_handler, &user_data);
             break;
         case 2:
         {
@@ -110,6 +114,7 @@ int main(int argc, char** argv)
         }
 
 		printf("return of %s: %d\n", capture_types[capture_type], ret);
+        printf("user data: %d\n", user_data);
  CLOSE_EXIT:
         pcap_close(adhandle);
     }
