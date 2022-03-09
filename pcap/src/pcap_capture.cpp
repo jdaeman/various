@@ -18,7 +18,7 @@ void packet_handler(u_char* param,
         index = *param;
     }
     printf("[%d] caplen: %d\n", index, header->caplen);
-	printf("[%d] len: %d\n\n", index, header->len);
+    printf("[%d] len: %d\n\n", index, header->len);
 }
 
 int main(int argc, char** argv) 
@@ -137,7 +137,7 @@ int main(int argc, char** argv)
             goto CLOSE_EXIT;
         }
 
-		printf("return of %s: %d\n", capture_types[capture_type], ret);
+        printf("return of %s: %d\n", capture_types[capture_type], ret);
         printf("user data: %d\n", user_data);
  CLOSE_EXIT:
         pcap_close(adhandle);
