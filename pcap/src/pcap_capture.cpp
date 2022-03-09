@@ -1,17 +1,24 @@
 #include "pcap.h"
 
+#ifdef inline
+#undef inline
+#endif
+
 #include <cstdlib>
 #include <cstring>
+#include <thread>
 
 void packet_handler(u_char* param,
                     const struct pcap_pkthdr* header, 
                     const u_char* pkt_data) 
 {
+    int index = -1;
     if (param != NULL) {
         *param += 1;
+        index = *param;
     }
-    printf("caplen: %d\n", header->caplen);
-	printf("len: %d\n\n", header->len);
+    printf("[%d] caplen: %d\n", index, header->caplen);
+	printf("[%d] len: %d\n\n", index, header->len);
 }
 
 int main(int argc, char** argv) 
@@ -26,9 +33,10 @@ int main(int argc, char** argv)
     int capture_type = -1;
     int capture_count = 0;
     int timeout = 0;
+    int breaktimeout = 0;
 
-    if (argc < 4) {
-        printf("Usage: %s [capture_type] [capture_count] [timeout(sec)]\n", argv[0]);
+    if (argc < 5) {
+        printf("Usage: %s [capture_type] [capture_count] [timeout(sec)] [break(sec)]\n", argv[0]);
         printf("Capture types\n");
         for (int i = 0; i < sizeof(capture_types) / sizeof(const char*); i++) {
             printf("[%d]: %s\n", i, capture_types[i]);
@@ -39,6 +47,7 @@ int main(int argc, char** argv)
     capture_type = atoi(argv[1]);
     capture_count = atoi(argv[2]);
     timeout = atoi(argv[3]) * 1000;
+    breaktimeout = atoi(argv[4]);
 
     if (pcap_findalldevs(&alldevs, errbuf) < 0) {
         printf("pcap_findalldevs error\n");
@@ -80,6 +89,21 @@ int main(int argc, char** argv)
             goto CLOSE_EXIT;
         }
 #endif
+        std::thread th_pcap_breakloop;
+        if (breaktimeout != 0) {
+            printf("pcap_break after %d sec\n", breaktimeout);
+            th_pcap_breakloop = std::thread([breaktimeout, &adhandle]() {
+                std::this_thread::sleep_for(std::chrono::seconds(breaktimeout));
+                if (adhandle == NULL) {
+                    printf("already terminated\n");
+                }
+                else {
+                    pcap_breakloop(adhandle);
+                    printf("execute pcap_breakloop\n");
+                }
+            });
+        }
+
 
         printf("Start: packet capture by %s\n", capture_types[capture_type]);
         printf("Capture count: %d\n", capture_count);
@@ -117,6 +141,11 @@ int main(int argc, char** argv)
         printf("user data: %d\n", user_data);
  CLOSE_EXIT:
         pcap_close(adhandle);
+        adhandle = NULL;
+
+        if (th_pcap_breakloop.joinable()) {
+            th_pcap_breakloop.join();
+        }
     }
 
     return 0;

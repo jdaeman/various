@@ -6,6 +6,7 @@ add_definitions(-D_WINSOCK_DEPRECATED_NO_WARNINGS)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 set(PCAP_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/WpdPack")
 else ()
+# for c++ std 14
 set(CMAKE_CXX_STANDARD 14)
 endif ()
 
@@ -15,9 +16,9 @@ project(pcaps C CXX)
 find_package(PCAP REQUIRED)
 find_package(Threads REQUIRED)
 
-message(STATUS "pcap include " ${PCAP_INCLUDE_DIR})
-message(STATUS "pcap lib " ${PCAP_LIBRARY})
-message(STATUS "thread " ${CMAKE_THREAD_LIBS_INIT})
+message(STATUS "[pcap include] " ${PCAP_INCLUDE_DIR})
+message(STATUS "[pcap lib] " ${PCAP_LIBRARY})
+message(STATUS "[thread] " ${CMAKE_THREAD_LIBS_INIT})
 
 include_directories(SYSTEM ${PCAP_INCLUDE_DIR})
 
@@ -50,6 +51,8 @@ endif()
 link_libraries(${PCAP_LIBRARY})
 if (WIN32)
 link_libraries(ws2_32.lib)
+else()
+link_libraries(${CMAKE_THREAD_LIBS_INIT})
 endif()
 
 add_executable(capture src/pcap_capture.cpp)
