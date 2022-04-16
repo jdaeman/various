@@ -1,0 +1,48 @@
+import base64
+from Crypto.Cipher import AES
+
+BS = 16
+pad = lambda s: s + (BS - len(s) % BS) * chr(BS - len(s) % BS)
+unpad = lambda s: s[0:-ord(s[-1])]
+
+
+class AESCipher:
+    def __init__(self, key):
+        self.key = key
+
+    def encrypt(self, raw):
+        raw = pad(raw)
+        cipher = AES.new(self.key, AES.MODE_ECB)
+        raw = cipher.encrypt(raw)
+        encrypt_val = base64.b64encode(raw)
+        return encrypt_val
+
+    def decrypt(self, raw):
+        raw = raw.decode('base64')
+        cipher = AES.new(self.key, AES.MODE_ECB)
+        raw = cipher.decrypt(raw)
+        raw = unpad(raw)
+        return raw
+
+
+if __name__ == '__main__':
+    key = '123456789012345678901234'
+    plaintext = '111122223333'
+    print 'KEY = ' + key
+    print 'PLAINTEXT = ' + plaintext
+
+    ## Encrptor logic
+    encryptor = AESCipher(key)
+    ciphertext = encryptor.encrypt(plaintext)
+
+    hex_ciphertext = "".join("{:02x}".format(ord(c)) for c in ciphertext)
+    print 'Encrypted value : ' + hex_ciphertext
+
+    bytesarray = []
+    hexstr = ''.join(hex_ciphertext.split(" "))
+    for i in range(0, len(hexstr), 2):
+        bytesarray.append(chr(int(hexstr[i:i+2], 16)))
+
+    val = ''.join(bytesarray)
+    decrypt_ciphertxt = encryptor.decrypt(val)
+    print 'Decrypted value  : ' + decrypt_ciphertxt
